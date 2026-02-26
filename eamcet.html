@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAMCET Search</title>
+    <style>
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .logo {
+            width: 125px;
+            height: 125px;
+            object-fit: contain;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #4A90E2;
+            --primary-dark: #357ABD;
+            --background: #0B0F18;
+            --form-bg: #1A1F2E;
+            --input-bg: rgba(38, 43, 60, 0.8);
+            --error-color: #ef4444;
+            --success-bg: rgba(74, 144, 226, 0.1);
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        body {
+            background-color: var(--background);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(74, 144, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(100, 100, 255, 0.15) 0%, transparent 50%);
+            color: white;
+            font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .form-container {
+            background: linear-gradient(145deg, var(--form-bg), #1E2538);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 100px rgba(74, 144, 226, 0.1);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+        h2 {
+            margin-bottom: 2rem;
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            background-color: var(--input-bg);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234A90E2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
+            padding-right: 48px;
+        }
+
+        select option {
+            background-color: #1E2538;
+            color: white;
+            padding: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--form-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-table th {
+            background-color: rgba(74, 144, 226, 0.1);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .results-table tr:hover td {
+            background-color: var(--success-bg);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            text-align: center;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .results-container {
+                overflow-x: auto;
+            }
+            
+            .results-table {
+                min-width: 600px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            input, select, button {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>EAMCET Search</h2>
+        <form id="searchForm">
+            <input type="text" name="Inst_Code" placeholder="Institution Code">
+            <input type="text" name="Institution_Name" placeholder="Institution Name">
+            <input type="text" name="Branch_code" placeholder="Branch Code">
+            <input type="text" name="Roll_No" placeholder="Roll Number">
+            <input type="number" name="Rank" placeholder="Rank">
+            <input type="text" name="Candidate_Name" placeholder="Candidate Name">
+            <input type="text" name="Gender" placeholder="Gender (M/F)">
+            <input type="text" name="Region" placeholder="Region Code">
+            <input type="text" name="Caste_code" placeholder="Caste Code">
+            <input type="text" name="Seat_Cat" placeholder="Seat Category">
+            <input type="password" name="passwd" placeholder="Password">
+            <button type="submit" id="submitButton">
+                <span id="buttonText">Search</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
+        </form>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="results-container" id="resultsContainer">
+        <h2>Search Results</h2>
+        <div class="table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Inst_Code</th>
+                        <th>Institution_Name</th>
+                        <th>Branch_code</th>
+                        <th>Roll_No</th>
+                        <th>Rank</th>
+                        <th>Candidate_Name</th>
+                        <th>Gender</th>
+                        <th>Region</th>
+                        <th>Caste_code</th>
+                        <th>Seat_Cat</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsBody = document.getElementById('resultsBody');
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+
+            errorMessage.style.display = 'none';
+            resultsContainer.style.display = 'none';
+
+            // gather form values
+            const fields = [
+                'Inst_Code','Institution_Name','Branch_code','Roll_No',
+                'Rank','Candidate_Name','Gender','Region','Caste_code','Seat_Cat','passwd'
+            ];
+            const formData = {};
+            fields.forEach(name => {
+                const el = document.querySelector(`[name="${name}"]`);
+                if (!el) return;
+                const val = el.value.trim();
+                if (val !== '') {
+                    formData[name] = name === 'Rank' ? parseInt(val, 10) : val;
+                }
+            });
+
+            // validation: at least one search field (not passwd) must be present
+            const hasSearch = Object.keys(formData).some(k => k !== 'passwd');
+            if (!hasSearch) {
+                errorMessage.textContent = 'Please enter at least one search field.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (!formData.passwd) {
+                errorMessage.textContent = 'Password is required.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // disable button and show spinner
+            submitButton.disabled = true;
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+
+            try {
+                const response = await fetch('https://marvelous-druid-fcb5f4.netlify.app/.netlify/functions/eamcet/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.status === 200 && Array.isArray(data)) {
+                    resultsBody.innerHTML = '';
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.Inst_Code || '-'}</td>
+                            <td>${item.Institution_Name || '-'}</td>
+                            <td>${item.Branch_code || '-'}</td>
+                            <td>${item.Roll_No || '-'}</td>
+                            <td>${item.Rank || '-'}</td>
+                            <td>${item.Candidate_Name || '-'}</td>
+                            <td>${item.Gender || '-'}</td>
+                            <td>${item.Region || '-'}</td>
+                            <td>${item.Caste_code || '-'}</td>
+                            <td>${item.Seat_Cat || '-'}</td>
+                        `;
+                        resultsBody.appendChild(row);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    errorMessage.textContent = data.message || 'An error occurred';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                errorMessage.textContent = 'An error occurred while fetching the data';
+                errorMessage.style.display = 'block';
+            } finally {
+                submitButton.disabled = false;
+                buttonText.style.display = 'block';
+                spinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
